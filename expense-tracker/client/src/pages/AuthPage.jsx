@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser, saveSession } from "../services/auth.js";
+import { formatCurrency } from "../utils/currency.js";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export default function AuthPage() {
         <div className="hero-card">
           <div>
             <p>Monthly Spend</p>
-            <h3>$1,842.50</h3>
+            <h3>{formatCurrency(1842.5)}</h3>
           </div>
           <div>
             <p>Top Category</p>

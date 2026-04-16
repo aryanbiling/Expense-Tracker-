@@ -2,9 +2,33 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ExpenseForm from "../components/ExpenseForm.jsx";
 import ExpenseList from "../components/ExpenseList.jsx";
-import StatCard from "../components/StatCard.jsx";
 import { clearSession, getUser } from "../services/auth.js";
 import { createExpense, deleteExpense, fetchExpenses } from "../services/expenses.js";
+import { formatCurrency } from "../utils/currency.js";
+
+const NavItem = ({ active, label }) => (
+  <button className={`nav-item ${active ? "active" : ""}`} type="button">
+    <span className="dot" />
+    {label}
+  </button>
+);
+
+const StatPill = ({ label, value, trend, tone }) => (
+  <div className={`stat-pill ${tone}`}>
+    <div>
+      <p>{label}</p>
+      <h3>{value}</h3>
+    </div>
+    <span className="trend">{trend}</span>
+  </div>
+);
+
+const Insight = ({ text }) => (
+  <div className="insight">
+    <span className="spark" />
+    <p>{text}</p>
+  </div>
+);
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -39,7 +63,7 @@ export default function Dashboard() {
     return {
       total,
       weekly,
-      topCategory: topCategory ? `${topCategory[0]} ($${topCategory[1].toFixed(2)})` : "-"
+      topCategory: topCategory ? `${topCategory[0]} (${formatCurrency(topCategory[1])})` : "-"
     };
   }, [expenses]);
 
@@ -85,40 +109,121 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard">
-      <header className="topbar">
-        <div>
-          <h1>Hello {user?.name || "there"}</h1>
-          <p>Track, plan, and stay in control.</p>
+    <div className="dashboard-shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="logo">ET</div>
+          <div>
+            <h2>Expense Tracker</h2>
+            <p>Manage, split, simplify</p>
+          </div>
+        </div>
+        <nav className="nav">
+          <NavItem active label="Dashboard" />
+          <NavItem label="Analytics" />
+          <NavItem label="Transactions" />
+          <NavItem label="Budgets" />
+          <NavItem label="Goals" />
+        </nav>
+        <div className="sidebar-card">
+          <p>Welcome back,</p>
+          <h3>{user?.name || "there"}</h3>
+          <button className="primary" type="button">Add Group</button>
         </div>
         <button className="ghost" onClick={handleLogout}>Log out</button>
-      </header>
+      </aside>
 
-      <section className="stats">
-        <StatCard label="This month" value={`$${totals.total.toFixed(2)}`} tone="accent" />
-        <StatCard label="Last 7 days" value={`$${totals.weekly.toFixed(2)}`} tone="soft" />
-        <StatCard label="Top category" value={totals.topCategory} tone="neutral" />
-      </section>
-
-      <section className="panel">
-        <div>
-          <h2>Add an expense</h2>
-          <p>Keep entries clean so you can spot trends later.</p>
-        </div>
-        <ExpenseForm onSubmit={handleAdd} />
-      </section>
-
-      <section className="panel">
-        <div className="panel-header">
+      <main className="dashboard-main">
+        <header className="topbar">
           <div>
-            <h2>Recent expenses</h2>
-            <p>Your latest activity appears here.</p>
+            <h1>Dashboard</h1>
+            <p>Track, plan, and stay in control.</p>
           </div>
-          {loading ? <span className="muted">Loading...</span> : null}
-        </div>
-        {error ? <div className="error">{error}</div> : null}
-        <ExpenseList items={expenses} onDelete={handleDelete} />
-      </section>
+          <div className="topbar-actions">
+            <div className="search">
+              <input placeholder="Search transactions" />
+            </div>
+            <button className="icon">🔔</button>
+            <div className="avatar">{user?.name?.[0] || "U"}</div>
+          </div>
+        </header>
+
+        <section className="stat-grid">
+          <StatPill label="This month" value={formatCurrency(totals.total)} trend="+4.2%" tone="purple" />
+          <StatPill label="Last 7 days" value={formatCurrency(totals.weekly)} trend="-1.3%" tone="teal" />
+          <StatPill label="Top category" value={totals.topCategory} trend="Food" tone="amber" />
+          <div className="hero-card">
+            <h4>Savings goal</h4>
+            <p>Europe trip</p>
+            <div className="progress">
+              <div style={{ width: "56%" }} />
+            </div>
+            <span>56% complete</span>
+          </div>
+        </section>
+
+        <section className="content-grid">
+          <div className="panel wide">
+            <div className="panel-header">
+              <div>
+                <h2>Add an expense</h2>
+                <p>Keep entries clean so you can spot trends later.</p>
+              </div>
+            </div>
+            <ExpenseForm onSubmit={handleAdd} />
+          </div>
+
+          <div className="panel insights">
+            <h3>Smart insights</h3>
+            <Insight text="Dining spend is 12% higher than last month." />
+            <Insight text="You can save $120 by reducing subscriptions." />
+            <Insight text="Weekend spend peaks on Saturdays." />
+          </div>
+        </section>
+
+        <section className="content-grid">
+          <div className="panel wide">
+            <div className="panel-header">
+              <div>
+                <h2>Recent expenses</h2>
+                <p>Your latest activity appears here.</p>
+              </div>
+              {loading ? <span className="muted">Loading...</span> : null}
+            </div>
+            {error ? <div className="error">{error}</div> : null}
+            <ExpenseList items={expenses} onDelete={handleDelete} />
+          </div>
+
+          <div className="panel friends">
+            <h3>Friends list</h3>
+            <div className="friend">
+              <div className="avatar small">A</div>
+              <div>
+                <p>Ankit</p>
+                <span>Owes you {formatCurrency(120)}</span>
+              </div>
+              <strong className="pos">+{formatCurrency(120)}</strong>
+            </div>
+            <div className="friend">
+              <div className="avatar small">P</div>
+              <div>
+                <p>Priya</p>
+                <span>You owe {formatCurrency(80)}</span>
+              </div>
+              <strong className="neg">-{formatCurrency(80)}</strong>
+            </div>
+            <div className="friend">
+              <div className="avatar small">S</div>
+              <div>
+                <p>Sahil</p>
+                <span>Owes you {formatCurrency(45)}</span>
+              </div>
+              <strong className="pos">+{formatCurrency(45)}</strong>
+            </div>
+            <button className="primary" type="button">Add Friend</button>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

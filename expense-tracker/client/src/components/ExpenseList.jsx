@@ -1,4 +1,5 @@
 import React from "react";
+import { formatCurrency } from "../utils/currency.js";
 
 export default function ExpenseList({ items, onDelete }) {
   if (!items.length) {
@@ -15,7 +16,7 @@ export default function ExpenseList({ items, onDelete }) {
             {expense.note ? <p className="note">{expense.note}</p> : null}
           </div>
           <div className="amount">
-            <span>${expense.amount.toFixed(2)}</span>
+            <span>{formatCurrency(expense.amount)}</span>
             <button className="ghost" onClick={() => onDelete(expense._id)}>Delete</button>
           </div>
         </div>
