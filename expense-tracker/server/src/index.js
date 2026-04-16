@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import { connectDb } from "./config/db.js";
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/expenses", expenseRoutes);
 
 const port = process.env.PORT || 5000;
